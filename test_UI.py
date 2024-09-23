@@ -11,6 +11,6 @@ def test_web():
     sale_link.click()
     title = browser.find_element(By.TAG_NAME,'h1')
 
-assert title.text == 'Sale'
+    assert title.text == 'Sale'
 #запуск через pytest
 
