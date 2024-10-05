@@ -2,7 +2,7 @@ from itertools import product
 
 from requests import options
 from selenium.webdriver.common.by import By
-import  time
+import time
 from pages.homepage import HomePage
 from pages.product import ProductPage
 
