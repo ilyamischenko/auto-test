@@ -1,11 +1,15 @@
 from itertools import product
+
+from requests import options
 from selenium.webdriver.common.by import By
 import  time
 from pages.homepage import HomePage
 from pages.product import ProductPage
 
 
+
 def test_open_sg_s6(browser):
+
     homepage = HomePage(browser)
     homepage.open()
     homepage.click_galaxy_s6()
