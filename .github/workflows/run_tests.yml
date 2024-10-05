@@ -33,6 +33,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
+      - name: Install ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*')
+          wget -N https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+
       - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
@@ -45,7 +53,21 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests and generate XML report
-        run: pytest -v --junitxml=pytest-results.xml  # Генерация XML-отчета
+        run: |
+          set -e  # Остановить выполнение при ошибке
+          echo "Running tests..."
+          pytest -v --junitxml=pytest-results.xml || { echo "pytest failed"; exit 1; }  # Генерация XML-отчета
+          echo "Tests completed."
+
+      - name: Check for test results
+        run: |
+          echo "Checking for test results..."
+          if [ -f pytest-results.xml ]; then
+            echo "Test results found."
+          else
+            echo "No test results found!"
+            exit 1  # Завершить работу с ошибкой
+          fi
 
       - name: Archive test results
         if: always()  # Загружаем артефакт в любом случае, даже если тесты прошли успешно
