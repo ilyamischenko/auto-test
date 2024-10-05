@@ -45,7 +45,18 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests and generate XML report
-        run: pytest -v --junitxml=pytest-results.xml  # Генерация XML-отчета
+        run: |
+          set -e  # Остановить выполнение при ошибке
+          pytest -v --junitxml=pytest-results.xml  # Генерация XML-отчета
+
+      - name: Check for test results
+        run: |
+          if [ -f pytest-results.xml ]; then
+            echo "Test results found."
+          else
+            echo "No test results found!"
+            exit 1  # Завершить работу с ошибкой
+          fi
 
       - name: Archive test results
         if: always()  # Загружаем артефакт в любом случае, даже если тесты прошли успешно
