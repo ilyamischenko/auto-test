@@ -1,29 +1,46 @@
 name: Run autotests
 
-
 on:
- workflow_dispatch:
-  inputs:
-   deployment_target:
-     description: select tests to run
-     required: true
-     type: choice
-     default: all
-     options:
-      - all
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: Select tests to run
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
 
 jobs:
   run-tests:
-   runs-on: ubuntu-latest
-   name: Tests
-   steps:
-     - name: Copy source code
-       uses: actions/checkout@v4
-     - name: Set up Python env
-       uses: actions/setup-python@v5
-       with:
-        python-version: "3.10" 
-     - name: install dependencies
-       run: pip install -r requirements.txt
-     - name: Run tests
-       run: pytest -v
+    runs-on: ubuntu-latest
+    name: Tests
+    steps:
+      - name: Copy source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python env
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest -v
+
+      - name: Archive test results
+        if: failure()  # Сохраняем артефакты только при падении тестов
+        uses: actions/upload-artifact@v3
+        with:
+          name: pytest-results
+          path: ./pytest-results.xml  # Если собираете отчеты в формате XML
