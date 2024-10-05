@@ -1,6 +1,8 @@
 from selenium import webdriver
 import pytest
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager  # Добавляем webdriver_manager для ChromeDriver
 import logging
 
 logging.basicConfig(
@@ -16,13 +18,17 @@ def browser():
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')  # Отключение GPU (полезно для Windows)
+    options.add_argument('--no-sandbox')  # Безопасный режим (полезно для CI/CD)
+    options.add_argument('--disable-dev-shm-usage')  # Исправляет проблемы с памятью на серверах
 
-    logging.info("Запускаем браузер в headless-режиме с заданными опциями.")
-    browser = webdriver.Chrome(options=options)
+    logging.info("Запускаем браузер с webdriver_manager.")
+
+    # Автоматическая установка ChromeDriver с помощью webdriver_manager
+    browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     browser.maximize_window()
     browser.implicitly_wait(3)
-    # browser.implicitly_wait(3)  селениум сразу после открытия не успевает найти элемент который ищу
+
     yield browser
 
     logging.info("Закрываем браузер.")
-
+    browser.quit()
